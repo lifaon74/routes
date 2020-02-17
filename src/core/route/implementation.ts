@@ -12,6 +12,7 @@ import { ResolvableTree } from '../resolvable-tree/implementation';
 import { IResolvableTreeOptions, TResolvableTreeResolveCallback } from '../resolvable-tree/types';
 import { CreateResolvableTreeResolver, ICreateResolvableTreeResolverOptions } from '../resolvable-tree/functions';
 import { IPathMatcherResult } from '../path-matcher/types';
+import { $super } from '../../misc/instance/snippets';
 
 /** CONSTRUCTOR FUNCTIONS **/
 
@@ -108,7 +109,8 @@ export class Route extends ResolvableTree implements IRoute {
   }
 
   get children(): IReadonlyList<IRoute> {
-    return super['children'] as IReadonlyList<IRoute>;
+    return $super(this, ResolvableTree).get('children');
+    // return super.children as IReadonlyList<IRoute>;
   }
 
   get pathMatcher(): IPathMatcher {

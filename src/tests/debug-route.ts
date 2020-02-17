@@ -1,22 +1,22 @@
-import { Route } from '../misc/route/implementation';
+import { Route } from '../core/route/implementation';
 import { assert } from '../misc/helpers/asserts';
 import {
   CancellablePromise, IAdvancedAbortSignal, ICancellablePromise, ICancellablePromiseOptions, TAbortStrategy,
   TPromiseOrValue
 } from '@lifaon/observables';
-import { IRoute } from '../misc/route/interfaces';
+import { IRoute } from '../core/route/interfaces';
 import {
   IResolveAndExecLastRouteCallbackOptions, ResolveAndExecLastRoute
-} from '../misc/route/helpers/resolve-and-exec-last-route';
-import { HTTPRoute } from '../misc/http-route/implementation';
+} from '../core/route/helpers/resolve-and-exec-last-route';
+import { HTTPRoute } from '../built-in/http-route/implementation';
 import {
   IResolveAndExecLastHTTPRouteCallbackOptions, ResolveAndExecLastHTTPRoute
-} from '../misc/http-route/helpers/resolve-and-exec-last-http-route';
-import { HTTPMethod } from '../misc/http-route/types';
-import { IHTTPRoute } from '../misc/http-route/interfaces';
+} from '../built-in/http-route/helpers/resolve-and-exec-last-http-route';
+import { HTTPMethod } from '../built-in/http-route/types';
+import { IHTTPRoute } from '../built-in/http-route/interfaces';
 
 const $try = <T>(callback: <TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => TPromiseOrValue<T>) => {
-  return function <TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>): ICancellablePromise<T, TStrategy> {
+  return function <TStrategy extends TAbortStrategy>(this: any, options: ICancellablePromiseOptions<TStrategy>): ICancellablePromise<T, TStrategy> {
     return CancellablePromise.try<T, TStrategy>((signal: IAdvancedAbortSignal) => {
       return callback.call(this, {
         ...options,
@@ -40,36 +40,36 @@ export async function debugBaseRoute() {
   const route = new Route('/', {
     children: [
       new Route('/route1', {
-        exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastRouteCallbackOptions<TStrategy>) => {
+        exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
           console.log('route 1 resolved');
         }),
       }),
       new Route('/route2/:id', {
-        exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastRouteCallbackOptions<TStrategy>) => {
-          console.log('route 2 resolved', options.params);
+        exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
+          console.log('route 2 resolved', (options as IResolveAndExecLastRouteCallbackOptions<TStrategy>).params);
         }),
         children: [
           new Route('/child', {
-            exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastRouteCallbackOptions<TStrategy>) => {
-              console.log('route 2 child resolved', options.params);
+            exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
+              console.log('route 2 child resolved', (options as IResolveAndExecLastRouteCallbackOptions<TStrategy>).params);
             })
           }),
         ]
       }),
       new Route('/route3', {
-        exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastRouteCallbackOptions<TStrategy>) => {
-          console.log('route 3 resolved', options.params);
+        exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
+          console.log('route 3 resolved', (options as IResolveAndExecLastRouteCallbackOptions<TStrategy>).params);
         }),
         children: [
           new Route('/child', {
-            exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastRouteCallbackOptions<TStrategy>) => {
-              console.log('route 3 child resolved', options.params);
+            exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
+              console.log('route 3 child resolved', (options as IResolveAndExecLastRouteCallbackOptions<TStrategy>).params);
             })
           }),
         ]
       }),
       new Route('/route4/**', {
-        exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastRouteCallbackOptions<TStrategy>) => {
+        exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
           console.log('route 4 resolved');
         })
       }),
@@ -106,17 +106,17 @@ export async function debugRouteWithDefault() {
   const route = new Route('/', {
     children: [
       new Route('/route1', {
-        exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastRouteCallbackOptions<TStrategy>) => {
+        exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
           console.log('route 1 resolved');
         })
       }),
       new Route('/route2**', {
-        exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastRouteCallbackOptions<TStrategy>) => {
+        exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
           console.log('route 2 wildcard resolved');
         })
       }),
       new Route('/**', {
-        exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastRouteCallbackOptions<TStrategy>) => {
+        exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
           console.log('route default resolved');
         })
       }),
@@ -136,18 +136,18 @@ export async function debugHTTPRoute() {
   const route = new HTTPRoute('/', {
     children: [
       new HTTPRoute('/route1', {
-        methods: ['GET'],
-        exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastHTTPRouteCallbackOptions<TStrategy>) => {
+        methods: ['GET'] as ('GET'[]),
+        exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
           console.log('route 1 GET resolved');
         })
       }),
       new HTTPRoute('/route1', {
-        exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastHTTPRouteCallbackOptions<TStrategy>) => {
+        exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
           console.log('route 1 ANY resolved');
         })
       }),
       new HTTPRoute('/**', {
-        exec: $try(<TStrategy extends TAbortStrategy>(options: IResolveAndExecLastHTTPRouteCallbackOptions<TStrategy>) => {
+        exec: $try(<TStrategy extends TAbortStrategy>(options: ICancellablePromiseOptions<TStrategy>) => {
           console.log('route default resolved');
         })
       }),

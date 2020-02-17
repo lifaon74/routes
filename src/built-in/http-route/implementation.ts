@@ -11,6 +11,7 @@ import { ConstructHTTPRoute } from './constructor';
 import { Route } from '../../core/route/implementation';
 import { IRouteOptions, TRouteResolveCallback } from '../../core/route/types';
 import { IResolvableTree } from '../../core/resolvable-tree/interfaces';
+import { $super } from '../../misc/instance/snippets';
 
 /** CONSTRUCTOR FUNCTIONS **/
 
@@ -58,7 +59,8 @@ export class HTTPRoute extends Route implements IHTTPRoute {
   }
 
   get children(): IReadonlyList<IHTTPRoute> {
-    return super['children'] as IReadonlyList<IHTTPRoute>;
+    return $super(this, Route).get('children');
+    // return super['children'] as IReadonlyList<IHTTPRoute>;
   }
 
   get methods(): IReadonlySet<HTTPMethod> | null {
